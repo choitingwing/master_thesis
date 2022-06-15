@@ -1,0 +1,94 @@
+
+datapath =  /mnt/md0/data/SouthPole/single_surface_4LPDA_PA_15m_RNOG_fullsim.json/ARZ2020_emhad_noise.yaml/G03generate_events_full_surface_sim/LPDA_2of4_100Hz/4LPDA_1dipole_fullband/em_had_separately/
+data_filename =  data_had_emhad_1-3_had_1_LPDA_2of4_100Hz_4LPDA_1dipole_fullband_
+label_filename =  labels_had_emhad_1-3_had_1_LPDA_2of4_100Hz_4LPDA_1dipole_fullband_
+
+Training files #:  [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+ 24 25 26 27 28 29 30 31 32]
+Val files #:  [33 34 35 36 37]
+Test files #:  [38 39 40]
+
+Preparing datasets...
+Picked training set ids: [ 5 27  0 15 31 13 23  8 12 25 11  2  9 22 30 28 16 24 21 32  6 17  4 26
+ 10 18  3 19  1 29  7 14 20]
+Picked val set ids: [36 34 35 37 33]
+loading file 5
+finished loading file 5 in 35.52107572555542s
+loading file 27
+finished loading file 27 in 12.077627658843994s
+loading file 0
+finished loading file 0 in 11.778424263000488s
+loading file 15
+finished loading file 15 in 12.54261064529419s
+loading file 31
+finished loading file 31 in 12.331067085266113s
+loading file 13
+finished loading file 13 in 13.432810306549072s
+loading file 23
+finished loading file 23 in 12.869318723678589s
+loading file 8
+finished loading file 8 in 12.366359233856201s
+loading file 12
+finished loading file 12 in 16.938090324401855s
+loading file 25
+finished loading file 25 in 22.546461582183838s
+loading file 11
+finished loading file 11 in 14.375677824020386s
+loading file 2
+finished loading file 2 in 21.804641008377075s
+loading file 9
+finished loading file 9 in 11.567019939422607s
+loading file 22
+finished loading file 22 in 22.61581802368164s
+loading file 30
+finished loading file 30 in 17.725369453430176s
+loading file 28
+finished loading file 28 in 11.925621509552002s
+loading file 16
+finished loading file 16 in 32.657973527908325s
+loading file 24
+finished loading file 24 in 35.78955602645874s
+loading file 21
+finished loading file 21 in 35.55999207496643s
+loading file 32
+finished loading file 32 in 35.47885179519653s
+loading file 6
+finished loading file 6 in 35.73923468589783s
+loading file 17
+finished loading file 17 in 36.564470052719116s
+loading file 4
+finished loading file 4 in 35.37261724472046s
+loading file 26
+finished loading file 26 in 35.76645231246948s
+loading file 10
+finished loading file 10 in 35.37019491195679s
+loading file 18
+finished loading file 18 in 37.17112851142883s
+loading file 3
+finished loading file 3 in 35.58897948265076s
+loading file 19
+finished loading file 19 in 37.09728693962097s
+loading file 1
+finished loading file 1 in 35.4504017829895s
+loading file 29
+finished loading file 29 in 35.810368061065674s
+loading file 7
+finished loading file 7 in 36.25047206878662s
+loading file 14
+finished loading file 14 in 13.703108549118042s
+loading file 20
+finished loading file 20 in 37.15597224235535s
+Total train data points:  3299932
+loading file 36
+finished loading file 36 in 37.11726665496826s
+loading file 34
+finished loading file 34 in 12.121289491653442s
+loading file 35
+finished loading file 35 in 12.75061321258545s
+loading file 37
+finished loading file 37 in 12.088347911834717s
+loading file 33
+finished loading file 33 in 13.057105541229248s
+Total train data points:  499982
+Training is starting
+Training is starting
