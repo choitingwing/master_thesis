@@ -1,3 +1,4 @@
-# master_thesis
+# Error estimation using Likelihood Inference
 
-#testing download...
+run the training: python training.py EXAMPLE.X
+where "X" is a integer.
