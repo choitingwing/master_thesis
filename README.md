@@ -1,4 +1,4 @@
-# Error estimation of neutrinos energy
+# Error estimation of neutrinos energy using Deep Learning technique.
 
 These code is base on my master thesis: "DiVa link"
 The estimation is done by two methods: Likelihood Inference and Normalising Flows
