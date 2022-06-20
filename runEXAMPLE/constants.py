@@ -23,16 +23,12 @@ datapath = dataset.datapath
 data_filename = dataset.data_filename
 label_filename = dataset.label_filename
 
-# numbers
+# numbers of files
 n_files = dataset.n_files
 n_files_val = dataset.n_files_val
 test_file_ids = dataset.test_file_ids
 
-#running stuff
-
-epochs = 25
-norm = 1e-6
-
+# Training with the whole "ARZ" dataset
 train_files = 33
 val_files = 5
 test_files = 3
@@ -40,6 +36,7 @@ train_data_points = 3290000
 val_data_points = 490000     
 test_data_points = 299995  
 
+# Training with 1/10 of "ARZ" dataset
 # train_files = 2
 # val_files = 1
 # test_files = 1
@@ -49,10 +46,14 @@ test_data_points = 299995
 
 sample_numbers = 10000
 
+# (hyper-)parameters for training
+epochs = 25
+norm = 1e-6
 learning_rate = 0.00005
 es_patience = 8
 es_min_delta = 0.0001 # Old value: es_min_delta = 0.0001
 batchSize = 64
+
 
 # Directories
 plots_dir = "plots"

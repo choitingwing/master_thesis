@@ -11,13 +11,14 @@ import pickle
 import argparse
 from termcolor import colored
 from toolbox import load_file, models_dir
-from constants import datapath, data_filename, label_filename, test_file_ids
-# -------
-start = time.time()
-#GPU
+from constants import datapath, data_filename, label_filename, test_file_ids, test_files
 import torch
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print("Using",device,". GPU # is",torch.cuda.current_device())
+# -------
+start = time.time() # to calculate evaluation time later.
+
+#GPU # currently not using
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# print("Using",device,". GPU # is",torch.cuda.current_device())
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='Evaluate energy resolution')
@@ -32,7 +33,6 @@ filename = f"model_history_log_{run_name}.csv"
 
 # Models folder
 saved_model_dir = models_dir(run_name)
-
 print(colored(f"Evaluating energy resolution for {run_name}...", "yellow"))
 print(saved_model_dir)
 
@@ -41,13 +41,18 @@ from generator import E_Model
 import pytorch_lightning as pl
 import jammy_flows
 
-# mymodel = E_Model().to(device)
+
 mymodel = E_Model()
-save_model_path=os.path.join(saved_model_dir,  "latest_model_checkpoint.ckpt")
+# mymodel = E_Model().to(device) # if using GPU (error is not fixed for NFs)
+
+# load the model saved by PL (best model)
+save_model_path=os.path.join(saved_model_dir,  "latest_model_checkpoint.ckpt") 
 mymodel = E_Model().load_from_checkpoint(save_model_path)
 
-# save_model_path=os.path.join(saved_model_dir,  f"{run_name}.pt")
+#load the model saved by torch (last model)
+# save_model_path=os.path.join(saved_model_dir,  f"{run_name}.pt") 
 # mymodel.load_state_dict(torch.load(save_model_path))
+
 mymodel.eval()
 mymodel.double()
 
@@ -57,27 +62,26 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 from constants import test_data_points
 
-list_of_file_ids_test_small = np.random.choice(test_file_ids, size=3, replace=False)
+list_of_file_ids_test_small = np.random.choice(test_file_ids, size=test_files, replace=False)
 test = Prepare_Dataset(file_ids=list_of_file_ids_test_small, points = test_data_points)#test_data_points)
 print("Picked test set ids:",list_of_file_ids_test_small)
 print("Length of test dataset: ", len(test))
 
 test_loader = DataLoader(test, batch_size=1, shuffle=False)
 
-n = 10000
+n = 10000 # number of sample point
 x_list=[]
 y_list=[]
 shower_energy_log10 = []
-
 gauss_fit_sigma_list = []
 true_energy_prob_list = []
+
 from scipy.optimize import curve_fit
 from scipy import interpolate
 def gauss(x, *p):
     A, mu, sigma = p
     return A*(2 * np.pi * sigma)**-0.5 * np.exp(-0.5 * (x - mu) ** 2 * sigma ** -2)
     
-# target_sample_list = np.zeros((1,n))
 with torch.no_grad():
     # Iterate through test set minibatchs 
     for x, y in tqdm(test_loader):
@@ -94,17 +98,17 @@ with torch.no_grad():
         p0 = [np.max(count), np.mean(target_sample.numpy()), np.std(target_sample.numpy())]
         coeff, var_matrix = curve_fit(gauss, bins_middle, count, p0=p0, maxfev = 5000)
         
-        gauss_fit_sigma_list.append(coeff[2]) #sigma fit
+        gauss_fit_sigma_list.append(coeff[2]) #fitted sigma 
         
         # Coverage
         target_pdf = np.exp(target_log_pdf.numpy())
         sorted_target_sample = np.sort(np.squeeze(target_sample.numpy()))
         index_sorted_target_sample = np.argsort(np.squeeze(target_sample.numpy()))
-        sorted_target_pdf = target_pdf[index_sorted_target_sample]
+        sorted_target_pdf = target_pdf[index_sorted_target_sample] # make it ascending order of energy
 
-        #CDF
+            # create a CDF from the pdf, vs energy
         cdf_dx = np.diff(sorted_target_sample)
-        cdf_x = 0.5*(sorted_target_sample[1:] + sorted_target_sample[:-1])
+        cdf_x = 0.5*(sorted_target_sample[1:] + sorted_target_sample[:-1]) # mid point of pdf
         pdf_y = 0.5*(sorted_target_pdf[1:] + sorted_target_pdf[:-1])
         pdf_middle_y = cdf_dx*pdf_y
             
@@ -113,11 +117,11 @@ with torch.no_grad():
             cdf_y[i] = np.sum(pdf_middle_y[:i])
             
         cdf = interpolate.interp1d(cdf_x, cdf_y)
-        try:
+        try:# the true value could outside the range of prediction
             true_energy_prob = cdf(y.item())
             true_energy_prob_list.append(true_energy_prob)
         except: 
-            true_energy_prob_list.append(0)
+            true_energy_prob_list.append(0) 
 
         
         

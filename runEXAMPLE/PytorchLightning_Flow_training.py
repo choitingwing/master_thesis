@@ -105,10 +105,6 @@ val = Prepare_Dataset(file_ids=list_of_file_ids_val_small, points = val_data_poi
 # print(train, len(train), x_train.shape, y_train)
 # print(val, len(val), x_val.shape, y_val)
 
-
-# In[ ]:
-
-
 # load data
 from torch.utils.data import DataLoader
 train_loader = DataLoader(train, batch_size=batchSize, shuffle=True, num_workers=64, pin_memory=True)
@@ -160,9 +156,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import CSVLogger
 from pytorch_lightning.callbacks import Callback
 
-mc = ModelCheckpoint(dirpath=saved_model_dir, filename= "latest_model_checkpoint", 
-    monitor='val_loss', verbose=1)
-
+mc = ModelCheckpoint(dirpath=saved_model_dir, filename= "latest_model_checkpoint", monitor='val_loss', verbose=1) # save best model
 es = EarlyStopping("val_loss", patience=es_patience, min_delta=es_min_delta, verbose=1)
 
 class MyPrintingCallback(Callback):
@@ -182,7 +176,7 @@ class MyPrintingCallback(Callback):
 callbacks = [es, mc, MyPrintingCallback()] # DeviceStatsMonitor()
 
 # Configuring CSV-logger : save epoch and loss values
-csv_logger = CSVLogger(saved_model_dir, version=0)#, flush_logs_every_n_steps=64)#, append=True)
+csv_logger = CSVLogger(saved_model_dir, version=0)
 
 
 # In[ ]:
@@ -192,9 +186,11 @@ csv_logger = CSVLogger(saved_model_dir, version=0)#, flush_logs_every_n_steps=64
 trainer = pl.Trainer(
     gpus=2, 
     auto_select_gpus=True,
+    ## alternative setting for gpu
     # accelerator="gpu", 
     # devices=[2],
     # num_nodes=2,
+
     strategy="ddp_sharded",
     precision=16,
 
@@ -203,12 +199,10 @@ trainer = pl.Trainer(
     logger = csv_logger,
     num_sanity_val_steps=0,
     enable_progress_bar = False,
-    # profiler="simple"
     # profiler="advanced" # or "simple" ,how long a function takes or how much memory is used.
-    )
-    # 
+    ) 
     
-try:
+try: # unsolved error, error occur when running trainer for the first time.
     trainer.fit(model, train_loader, val_loader)
 except: 
     trainer.fit(model, train_loader, val_loader)
@@ -216,7 +210,7 @@ except:
 # In[ ]:
 
 
-# Save the model (for opening in eg Netron)
+# Save the model (last model)
 save_model_path=os.path.join(saved_model_dir, f"{run_name}.pt")
 torch.save(model.state_dict(), save_model_path)
 

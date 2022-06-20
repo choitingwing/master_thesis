@@ -5,7 +5,7 @@ import numpy as np
 import time
 from toolbox import load_file
 from constants import datapath, data_filename, label_filename, n_files, n_files_val
-from constants import learning_rate, es_patience
+from constants import learning_rate, es_patience, norm
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
@@ -16,21 +16,16 @@ np.set_printoptions(precision=4)
 
 # n_files and n_files_val comes from dataset in constants.py
 n_files_test = 3
-norm = 1e-6
 
 n_files_train = n_files - n_files_val - n_files_test
 list_of_file_ids_train = np.arange(n_files_train, dtype=np.int)
 list_of_file_ids_val = np.arange(n_files_train, n_files_train + n_files_val, dtype=np.int)
 list_of_file_ids_test = np.arange(n_files_train + n_files_val, n_files, dtype=np.int)
 n_events_per_file = 100000
-batch_size = 64
-
-# print(f"training on {n_files_train} files ({n_files_train/n_files*100:.1f}%), validating on {n_files_val} files ({n_files_val/n_files*100:.1f}%), testing on {n_files_test} files ({n_files_test/n_files*100:.1f}%)")
-
 
 #dataset
 class Prepare_Dataset(Dataset):
-    def __init__(self, file_ids, points = 10000, transform=None, target_transform=None):
+    def __init__(self, file_ids, points = 10000, transform=None, target_transform=None): # not using the last two inputs
         data, shower_energy_log10 = load_file(file_ids[0],norm)
         # Then load rest of files
         if len(file_ids) > 1:
@@ -72,7 +67,7 @@ class Prepare_Dataset(Dataset):
         return data_i, label_i
 
 
-## Model (for import use)
+## Model
 conv2D_filter_size = 5
 pooling_size = 4
 amount_Conv2D_layers_per_block = 3 
@@ -81,7 +76,6 @@ conv2D_filter_amount = 32
 
 from torch.optim.lr_scheduler import ReduceLROnPlateau 
 import pytorch_lightning as pl
-from torchsummary import summary
 import jammy_flows
 
 class E_Model(pl.LightningModule):
@@ -107,10 +101,7 @@ class E_Model(pl.LightningModule):
         # self.pdf = jammy_flows.pdf("e1", "gg", conditional_input_dim=2560, hidden_mlp_dims_sub_pdfs="512-128") # low loss, tf like result
         # self.pdf = jammy_flows.pdf("e1", "gg", conditional_input_dim=2560, hidden_mlp_dims_sub_pdfs="512-256-128") # bad sigma result
         # self.pdf = jammy_flows.pdf("e1", "gggg", conditional_input_dim=2560, hidden_mlp_dims_sub_pdfs="512-256-128") #  bad sigma result
-        self.pdf = jammy_flows.pdf("e1", "gg", conditional_input_dim=2560, hidden_mlp_dims_sub_pdfs="128") #model 8 tf like, best
-        #model 9 = 8 with more traning data
-        #model 1 = 8 + gggg
-
+        self.pdf = jammy_flows.pdf("e1", "gg", conditional_input_dim=2560, hidden_mlp_dims_sub_pdfs="128") #best
 
     def forward(self, x):
         x = self.cnn0(x)

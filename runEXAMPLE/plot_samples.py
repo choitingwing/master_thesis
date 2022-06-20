@@ -20,14 +20,10 @@ from toolbox import load_file, models_dir, calculate_percentage_interval
 from constants import datapath, data_filename, label_filename, test_file_ids, plots_dir
 # -------
 
-
-# In[ ]:
-
-
-#GPU
 import torch
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print("Using",device,". GPU # is",torch.cuda.current_device())
+#GPU
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# print("Using",device,". GPU # is",torch.cuda.current_device())
 
 # Parse arguments
 parser = argparse.ArgumentParser(description='Evaluate energy resolution')
@@ -55,6 +51,7 @@ mymodel = E_Model()
 
 # save_model_path=os.path.join(saved_model_dir,  f"{run_name}.pt")
 # mymodel.load_state_dict(torch.load(save_model_path))
+
 save_model_path=os.path.join(saved_model_dir,  "latest_model_checkpoint.ckpt")
 mymodel = E_Model().load_from_checkpoint(save_model_path)
 
@@ -62,7 +59,6 @@ mymodel.eval()
 mymodel.double()
 
 # Load test file data and make predictions
-# way 1
 from generator import Prepare_Dataset
 from tqdm import tqdm
 from torch.utils.data import DataLoader
@@ -89,8 +85,7 @@ if not os.path.exists(plots_dir):
 binning = np.linspace(16, 20, 55)
 from scipy.optimize import curve_fit
 def gauss_fit_plot(sample_data, energysmallbin=''):   
-    (count, bins) = np.histogram(sample_data, bins=binning)#np.linspace(-40, 40, 400)
-                                 #bins=np.linspace(np.min(sigma_ratio_data)-0.1, np.max(sigma_ratio_data)+0.1, 100))
+    (count, bins) = np.histogram(sample_data, bins=binning)
 
     bins_middle = (bins[:-1] + bins[1:])/2
     p0 = [np.max(count), 18., 0.5]
@@ -101,7 +96,6 @@ def gauss_fit_plot(sample_data, energysmallbin=''):
     hist_fit = gauss(bins_middle, *coeff)
 
     fig, ax = php.get_histogram(sample_data, bins=binning, xlabel="log(E)")
-                                #bins=np.linspace(np.min(sigma_ratio_data)-0.1, np.max(sigma_ratio_data)+0.1, 100),
 
     # ax.plot(bins_middle, hist_fit, label=f"Gaussian fit with \n$\mu$ = {coeff[1]:.2f}\n$\sigma$ = {coeff[2]:.2f}")
     ax.axvline(x=y.item(), label = f"ture E = {y.item():.2f}", linewidth = 3)
@@ -125,7 +119,7 @@ with torch.no_grad():
         energy_68 = calculate_percentage_interval(sample_dist, 0.68)
         gauss_fit_plot(sample_dist)
 
-         # Coverage
+        # pdf vs energy
         target_pdf = np.exp(target_log_pdf.numpy())
         sorted_target_sample = np.sort(np.squeeze(target_sample.numpy()))
         index_sorted_target_sample = np.argsort(np.squeeze(target_sample.numpy()))
@@ -133,7 +127,7 @@ with torch.no_grad():
         
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        # ax.scatter(sorted_target_sample, sorted_target_pdf, c ='k', s=2, label = 'Energy PDF')
+
         ax.plot(sorted_target_sample, sorted_target_pdf, 'k-', label = 'Energy PDF')
         ax.axvline(x=y.item(), label = f"true E = {y.item():.2f}", linewidth = 3)
         ax.set_xlim(16, 20)
